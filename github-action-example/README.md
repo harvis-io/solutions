@@ -19,7 +19,6 @@ repository root.
 | `build.js` | Fetches the README, parses the Jamstack section, writes `dist/` |
 | `src/styles.css` | Stylesheet, copied into `dist/` verbatim |
 | `src/awesome-paas.md` | Last successful fetch — used as a fallback if upstream is unreachable |
-| `harvis.json` | Subdomain this example deploys to, recorded by the harvis CLI |
 | `../.github/workflows/github-action-example.yml` | Daily cron build + deploy |
 
 No dependencies and no `package.json`; `build.js` uses only Node 18+ built-ins.
@@ -45,20 +44,23 @@ workflow itself, and via **Run workflow**. It builds with `defaults.run.working-
 github-action-example`; the action's `directory` input is workspace-relative, so it stays
 `github-action-example/dist`.
 
-**First run — no configuration needed.** With no `site`/`token`, the action creates a fresh
-unclaimed site that expires after 24 hours. The run summary shows the URL and a single-use
-claim link.
+**First run — no configuration needed.** With no `token`, the action creates a fresh unclaimed
+site that expires after 24 hours. The run summary shows the URL and a single-use claim link.
 
 **To keep deploying to the same subdomain:**
 
 1. Claim the site via the link in the run summary, then copy its deploy token from the
    harvis.dev dashboard.
-2. In this repo: **Settings → Secrets and variables → Actions**
-   - Secret `HARVIS_DEPLOY_TOKEN` — the deploy token
-   - Variable `HARVIS_SITE` — the subdomain, e.g. `happy-panda-482`
+2. In this repo, add the secret `HARVIS_DEPLOY_TOKEN` under **Settings → Secrets and variables →
+   Actions**.
 
-Until those exist the inputs resolve to empty strings, which is exactly the unclaimed-site
-behaviour above — so the workflow is valid either way.
+That is the only setting: the token identifies the site by itself, so there is no subdomain to
+configure. Until the secret exists the input resolves to an empty string, which is exactly the
+unclaimed-site behaviour above — so the workflow is valid either way.
+
+A local `harvis` run writes a `harvis.json` here naming the site it deployed to. It is not
+committed: in CI the token decides, and locally the harvis CLI remembers the link in your own
+credential store.
 
 Note that scheduled workflows are disabled automatically after 60 days without repository
 activity, and GitHub may delay cron runs during busy periods.

@@ -1,3 +1,6 @@
 dist/
 node_modules/
 .DS_Store
+
+# Written by the harvis CLI on every deploy, including in CI.
+harvis.json

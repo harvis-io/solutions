@@ -43,7 +43,8 @@ jobs:
         with:
           # Action inputs resolve from the workspace root, not `defaults.run.working-directory`.
           directory: github-action-example/dist
-          site: ${{ vars.HARVIS_SITE }}
+          # The token names the site on its own. Unset, every run creates a
+          # fresh unclaimed site instead.
           token: ${{ secrets.HARVIS_DEPLOY_TOKEN }}
           name: Daily Demo
 

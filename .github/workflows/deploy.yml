@@ -1,0 +1,51 @@
+name: Build and deploy
+
+on:
+  schedule:
+    # 06:15 UTC every day. Offset from the hour: GitHub queues :00 crons heavily.
+    - cron: '15 6 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never let a scheduled run and a push run collide on the same site.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build site
+        run: node build.js
+
+      - name: Deploy to harvis.dev
+        id: deploy
+        uses: harvis-io/static-deploy-action@v1
+        with:
+          directory: dist
+          site: ${{ vars.HARVIS_SITE }}
+          token: ${{ secrets.HARVIS_DEPLOY_TOKEN }}
+          name: Daily Demo
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed"
+            echo ""
+            echo "- URL: ${{ steps.deploy.outputs.url }}"
+            echo "- Subdomain: \`${{ steps.deploy.outputs.subdomain }}\`"
+            if [ -n "${{ steps.deploy.outputs.claim-url }}" ]; then
+              echo "- Claim this site: ${{ steps.deploy.outputs.claim-url }}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,60 @@
+name: github-action-example — build and deploy
+
+on:
+  schedule:
+    # 06:15 UTC every day. Offset from the hour: GitHub queues :00 crons heavily.
+    - cron: '15 6 * * *'
+  push:
+    branches: [main]
+    # Other examples get their own workflows — don't rebuild this one on their changes.
+    paths:
+      - 'github-action-example/**'
+      - '.github/workflows/github-action-example.yml'
+  workflow_dispatch:
+
+# Never let a scheduled run and a push run collide on the same site.
+concurrency:
+  group: deploy-github-action-example
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: github-action-example
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build site
+        run: node build.js
+
+      - name: Deploy to harvis.dev
+        id: deploy
+        uses: harvis-io/static-deploy-action@v1
+        with:
+          # Action inputs resolve from the workspace root, not `defaults.run.working-directory`.
+          directory: github-action-example/dist
+          site: ${{ vars.HARVIS_SITE }}
+          token: ${{ secrets.HARVIS_DEPLOY_TOKEN }}
+          name: Daily Demo
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed"
+            echo ""
+            echo "- URL: ${{ steps.deploy.outputs.url }}"
+            echo "- Subdomain: \`${{ steps.deploy.outputs.subdomain }}\`"
+            if [ -n "${{ steps.deploy.outputs.claim-url }}" ]; then
+              echo "- Claim this site: ${{ steps.deploy.outputs.claim-url }}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

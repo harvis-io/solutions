@@ -1,4 +1,4 @@
-name: Build and deploy
+name: github-action-example — build and deploy
 
 on:
   schedule:
@@ -6,15 +6,23 @@ on:
     - cron: '15 6 * * *'
   push:
     branches: [main]
+    # Other examples get their own workflows — don't rebuild this one on their changes.
+    paths:
+      - 'github-action-example/**'
+      - '.github/workflows/github-action-example.yml'
   workflow_dispatch:
 
 # Never let a scheduled run and a push run collide on the same site.
 concurrency:
-  group: deploy
+  group: deploy-github-action-example
   cancel-in-progress: false
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: github-action-example
 
 jobs:
   deploy:
@@ -33,7 +41,8 @@ jobs:
         id: deploy
         uses: harvis-io/static-deploy-action@v1
         with:
-          directory: dist
+          # Action inputs resolve from the workspace root, not `defaults.run.working-directory`.
+          directory: github-action-example/dist
           site: ${{ vars.HARVIS_SITE }}
           token: ${{ secrets.HARVIS_DEPLOY_TOKEN }}
           name: Daily Demo

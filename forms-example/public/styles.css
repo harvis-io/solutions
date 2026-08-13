@@ -1,0 +1,211 @@
+/* harvis.dev palette: warm near-black canvas, one saturated accent, hairline borders. */
+:root {
+  --canvas: #13161a;
+  --surface: #191d21;
+  --inset: #0c0e10;
+  --line: rgba(255, 255, 255, 0.14);
+  --hairline: rgba(255, 255, 255, 0.10);
+  --text: #f7f8f6;
+  --muted: #b4bac1;
+  --accent: #ff4d17;
+  --accent-text: #ff9575;
+  --accent-fg: #ffffff;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --canvas: #f6f7ee;
+    --surface: #fdfdf8;
+    --inset: #eceee1;
+    --line: rgba(6, 7, 8, 0.16);
+    --hairline: rgba(6, 7, 8, 0.10);
+    --text: #13161a;
+    --muted: #484f57;
+    --accent: #e03a08;
+    --accent-text: #e03a08;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--text);
+  font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 72px 24px 56px;
+}
+
+main.centered {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  font: 12px/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: clamp(30px, 6vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  margin: 0 0 40px;
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+p { margin: 0 0 16px; }
+
+a { color: var(--accent-text); }
+
+code {
+  font: 13px/1.5 var(--mono);
+  background: var(--inset);
+  border: 1px solid var(--hairline);
+  padding: 1px 5px;
+}
+
+pre {
+  margin: 0 0 16px;
+  padding: 16px;
+  overflow-x: auto;
+  background: var(--inset);
+  border: 1px solid var(--hairline);
+}
+
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* Cards are flat with square corners — the house style. */
+.card {
+  margin: 0 0 24px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.hint {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+label {
+  font: 11px/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--inset);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+textarea { resize: vertical; }
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.check input { width: auto; }
+
+button, .button {
+  display: inline-block;
+  padding: 11px 20px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--accent-fg);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:hover, .button:hover { filter: brightness(1.08); }
+
+/* The subscribe form is one line until there is no room for one. */
+.inline {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inline input { flex: 1 1 240px; }
+
+.meta {
+  font: 13px/1.6 var(--mono);
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

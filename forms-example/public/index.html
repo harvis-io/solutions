@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forms example — harvis.dev</title>
+<meta name="description" content="A static page whose contact form posts to harvis.dev. No backend, no third-party form service, no JavaScript.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main>
+  <p class="eyebrow">example</p>
+  <h1>A static page with a real contact form.</h1>
+  <p class="lede">
+    Every file here is static. The two forms below still collect submissions, because harvis.dev
+    is already in the path of the HTML it serves and rewrites any form carrying the
+    <code>harvis-form</code> attribute. No backend, no third-party form service, no JavaScript.
+  </p>
+
+  <section class="card" id="contact">
+    <h2>Contact</h2>
+    <p class="hint">
+      Named <code>contact</code>, with its own thank-you page. Submissions appear in the dashboard
+      under that name.
+    </p>
+
+    <!--
+      One attribute is the whole integration. On the way out harvis overwrites `action` and
+      `method`, inserts an off-screen honeypot field, and turns data-harvis-redirect into a hidden
+      field — the handler never sees this HTML, only what the browser posts.
+    -->
+    <form harvis-form="contact" data-harvis-redirect="/thanks.html">
+      <div class="row">
+        <label for="name">name</label>
+        <input id="name" name="name" type="text" autocomplete="name" required>
+      </div>
+
+      <div class="row">
+        <label for="email">email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+      </div>
+
+      <div class="row">
+        <label for="topic">topic</label>
+        <select id="topic" name="topic">
+          <option>A question</option>
+          <option>A bug</option>
+          <option>Something else</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="message">message</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" name="reply" value="yes" checked>
+        <span>Reply to this address.</span>
+      </label>
+
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+  <section class="card" id="newsletter">
+    <h2>Updates</h2>
+    <p class="hint">
+      A second form, named <code>newsletter</code>. It has no redirect, so it lands on the branded
+      thank-you page harvis serves at <code>/__harvis/form/thanks</code>.
+    </p>
+
+    <form harvis-form="newsletter" class="inline">
+      <label class="sr-only" for="subscriber">email</label>
+      <input id="subscriber" name="email" type="email" placeholder="you@example.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <section id="how">
+    <h2>What makes it work</h2>
+    <p>
+      The markup is the integration. Everything else — the endpoint, the honeypot, the redirect
+      field — is filled in by harvis on the way out:
+    </p>
+    <pre><code>&lt;form harvis-form="contact" data-harvis-redirect="/thanks.html"&gt;
+  &lt;input name="email" type="email" required&gt;
+  &lt;textarea name="message"&gt;&lt;/textarea&gt;
+  &lt;button&gt;Send&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+    <p>
+      A form name must match <code>[a-z0-9][a-z0-9_-]{0,39}</code>; a bare <code>harvis-form</code>
+      collects under <code>default</code>. Submissions belong to the site rather than to the
+      deploy, so a redeploy keeps them. Read them in the dashboard, or over the account API with
+      the same key that published this page.
+    </p>
+    <p class="meta">
+      64 KB per submission · 30 fields · 60 per hour per site · 1,000 stored
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      Deployed from GitHub Actions with an account API key.
+      <a href="https://harvis.dev/forms">Forms on harvis.dev</a> ·
+      <a href="https://github.com/harvis-io/harvis.solutions/tree/main/forms-example">Source</a>
+    </p>
+  </footer>
+</main>
+</body>
+</html>

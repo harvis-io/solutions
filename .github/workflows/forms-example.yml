@@ -1,0 +1,72 @@
+name: forms-example — deploy
+
+on:
+  push:
+    branches: [main]
+    # Other examples get their own workflows — don't redeploy this one on their changes.
+    paths:
+      - 'forms-example/**'
+      - '.github/workflows/forms-example.yml'
+  workflow_dispatch:
+
+# Never let two runs replace the same site's files at once.
+concurrency:
+  group: deploy-forms-example
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: forms-example
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy to harvis.dev
+        id: deploy
+        env:
+          # An account key (hvs_…), not a site deploy token. The key creates the
+          # site on the first run and claims the address below, so this workflow
+          # needs no dashboard visit before it works — and the same credential
+          # can read the submissions the page collects, which a deploy token
+          # scoped to one site's files cannot.
+          HARVIS_API_KEY: ${{ secrets.HARVIS_API_KEY }}
+          # The address to keep. Set the repository variable to take a different
+          # one; it is unique across the whole service, so the default is only a
+          # sensible first guess.
+          HARVIS_SUBDOMAIN: ${{ vars.HARVIS_SUBDOMAIN || 'harvis-forms-example' }}
+          HARVIS_SITE_NAME: Forms example
+        run: ./deploy.sh public
+
+      - name: Form submissions so far
+        id: forms
+        env:
+          HARVIS_API_KEY: ${{ secrets.HARVIS_API_KEY }}
+          SITE_ID: ${{ steps.deploy.outputs.site-id }}
+        run: |
+          set -euo pipefail
+          # Reading the inbox is the half of this a deploy token has no access
+          # to. Submissions belong to the site and not to the deploy, so the
+          # count carries across the redeploy that just happened.
+          summary=$(curl -sS -H "Authorization: Bearer $HARVIS_API_KEY" \
+            "https://harvis.dev/api/v1/sites/$SITE_ID/submissions/summary")
+          echo "total=$(jq -r '.total' <<< "$summary")" >> "$GITHUB_OUTPUT"
+          echo "unread=$(jq -r '.unread' <<< "$summary")" >> "$GITHUB_OUTPUT"
+          echo "forms=$(jq -r '.forms | join(", ") // ""' <<< "$summary")" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed"
+            echo ""
+            echo "- URL: ${{ steps.deploy.outputs.url }}"
+            echo "- Subdomain: \`${{ steps.deploy.outputs.subdomain }}\`"
+            echo "- Submissions: ${{ steps.forms.outputs.total }} (${{ steps.forms.outputs.unread }} unread)"
+            echo "- Forms seen: ${{ steps.forms.outputs.forms }}"
+            echo "- Inbox: https://harvis.dev/dashboard/${{ steps.deploy.outputs.site-id }}/forms"
+          } >> "$GITHUB_STEP_SUMMARY"
